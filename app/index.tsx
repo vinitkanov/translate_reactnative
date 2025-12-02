@@ -16,8 +16,11 @@ import {
   Copy,
   Save,
 } from "lucide-react-native";
+import { push } from "expo-router/build/global-state/routing";
+import { router, useRouter } from "expo-router";
 
 export default function Index() {
+  const router=useRouter();
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.headerContainer}>
@@ -80,7 +83,7 @@ export default function Index() {
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push("/history")}>
           <History size={24} color="#000" />
           <Text style={styles.navText}>History</Text>
         </TouchableOpacity>
