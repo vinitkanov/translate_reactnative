@@ -2,7 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Bolt, History, House, Trash2 } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
+  ActivityIndicator,
   Alert,
   FlatList,
   ScrollView,
@@ -27,7 +27,7 @@ export default function HistoryScreen() {
   useFocusEffect(
     useCallback(() => {
       loadHistory();
-    }, [])
+    }, []),
   );
 
   const loadHistory = async () => {
@@ -65,7 +65,7 @@ export default function HistoryScreen() {
       onPress={() =>
         Alert.alert(
           `${item.fromLang} → ${item.toLang}`,
-          `"${item.sourceText}"\n\n↓\n\n"${item.translatedText}"`
+          `"${item.sourceText}"\n\n↓\n\n"${item.translatedText}"`,
         )
       }
       activeOpacity={0.7}
@@ -272,12 +272,3 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
-import { Text, View } from "react-native";
-
-export default function History() {
-  return (
-    <View>
-      <Text>History</Text>
-    </View>
-  );
-}
