@@ -272,3 +272,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+import { Text, View } from "react-native";
+
+export default function History() {
+  return (
+    <View>
+      <Text>History</Text>
+    </View>
+  );
+}
