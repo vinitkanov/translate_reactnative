@@ -19,6 +19,11 @@ import {
   Copy,
   Save,
 } from "lucide-react-native";
+import { push } from "expo-router/build/global-state/routing";
+import { router, useRouter } from "expo-router";
+
+export default function Index() {
+  const router=useRouter();
 import { useRouter } from "expo-router";
 const LANGUAGES = [
   { code: "auto", name: "Auto" },
@@ -275,6 +280,7 @@ export default function Index() {
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push("/history")}>
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/history")}
