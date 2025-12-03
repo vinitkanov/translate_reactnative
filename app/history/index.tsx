@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { Bolt, History, House, Trash2 } from "lucide-react-native";
+import { History, House, Settings, Trash2 } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,7 +23,6 @@ export default function HistoryScreen() {
   const [historyItems, setHistoryItems] = useState<TranslationRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load history setiap kali screen di-focus
   useFocusEffect(
     useCallback(() => {
       loadHistory();
@@ -45,9 +44,10 @@ export default function HistoryScreen() {
 
   const handleDelete = async (id: string) => {
     Alert.alert("Hapus", "Yakin ingin menghapus item ini?", [
-      { text: "Batal", onPress: () => {} },
+      { text: "Batal", style: "cancel" },
       {
         text: "Hapus",
+        style: "destructive",
         onPress: async () => {
           const success = await deleteTranslation(id);
           if (success) {
@@ -59,15 +59,25 @@ export default function HistoryScreen() {
     ]);
   };
 
+  const handleItemPress = (item: TranslationRecord) => {
+    // Pass semua data langsung via params
+    router.push({
+      pathname: "/detail",
+      params: {
+        id: item.id,
+        sourceText: item.sourceText,
+        translatedText: item.translatedText,
+        fromLang: item.fromLang,
+        toLang: item.toLang,
+        timestamp: item.timestamp,
+      },
+    });
+  };
+
   const renderHistoryItem = ({ item }: { item: TranslationRecord }) => (
     <TouchableOpacity
       style={styles.historyItem}
-      onPress={() =>
-        Alert.alert(
-          `${item.fromLang} → ${item.toLang}`,
-          `"${item.sourceText}"\n\n↓\n\n"${item.translatedText}"`,
-        )
-      }
+      onPress={() => handleItemPress(item)}
       activeOpacity={0.7}
     >
       <View style={styles.historyHeader}>
@@ -85,7 +95,10 @@ export default function HistoryScreen() {
       </Text>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => handleDelete(item.id)}
+        onPress={(e) => {
+          e.stopPropagation();
+          handleDelete(item.id);
+        }}
       >
         <Trash2 size={18} color="#d32f2f" />
       </TouchableOpacity>
@@ -103,7 +116,11 @@ export default function HistoryScreen() {
           </View>
         ) : historyItems.length === 0 ? (
           <View style={styles.emptyContainer}>
+            <History size={48} color="#ccc" />
             <Text style={styles.emptyText}>Belum ada riwayat terjemahan</Text>
+            <Text style={styles.emptySubtext}>
+              Terjemahan yang kamu simpan akan muncul di sini
+            </Text>
           </View>
         ) : (
           <FlatList
@@ -132,8 +149,11 @@ export default function HistoryScreen() {
           <Text style={styles.navText}>History</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navButton}>
-          <Bolt size={24} color="#000" />
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/options")}
+        >
+          <Settings size={24} color="#000" />
           <Text style={styles.navText}>Option</Text>
         </TouchableOpacity>
       </View>
@@ -146,13 +166,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-
   scrollContent: {
     paddingTop: 44,
     paddingHorizontal: 26,
     paddingBottom: 120,
   },
-
   title: {
     fontSize: 48,
     fontFamily: "serif",
@@ -161,28 +179,32 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "400",
   },
-
   listContent: {
     gap: 16,
   },
-
   loadingContainer: {
     paddingVertical: 40,
     justifyContent: "center",
     alignItems: "center",
   },
-
   emptyContainer: {
-    paddingVertical: 40,
+    paddingVertical: 60,
     justifyContent: "center",
     alignItems: "center",
   },
-
   emptyText: {
     fontSize: 16,
-    color: "#999",
+    color: "#666",
+    marginTop: 16,
+    fontWeight: "500",
   },
-
+  emptySubtext: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 8,
+    textAlign: "center",
+    paddingHorizontal: 32,
+  },
   historyItem: {
     borderWidth: 1.5,
     borderColor: "#d0d0d0",
@@ -191,19 +213,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     position: "relative",
   },
-
   historyHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
   },
-
   timestamp: {
     fontSize: 12,
     color: "#999",
   },
-
   langBadge: {
     fontSize: 11,
     color: "#666",
@@ -212,39 +231,33 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
-
   itemText: {
     fontSize: 14,
     color: "#000",
     lineHeight: 20,
     marginBottom: 6,
   },
-
   arrow: {
     fontSize: 12,
     color: "#999",
     textAlign: "center",
     marginVertical: 4,
   },
-
   translatedText: {
     fontSize: 14,
     color: "#333",
     lineHeight: 20,
     fontStyle: "italic",
   },
-
   deleteButton: {
     position: "absolute",
     top: 12,
     right: 12,
     padding: 8,
   },
-
   spacer: {
     height: 20,
   },
-
   bottomNav: {
     position: "absolute",
     bottom: 0,
@@ -260,12 +273,10 @@ const styles = StyleSheet.create({
     borderTopColor: "#e0e0e0",
     marginBottom: 30,
   },
-
   navButton: {
     alignItems: "center",
     gap: 4,
   },
-
   navText: {
     fontSize: 12,
     color: "#000",

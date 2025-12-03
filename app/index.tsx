@@ -8,18 +8,20 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
+  Clipboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   House,
   History,
-  Bolt,
+  Settings,
   ArrowRightLeft,
   ChevronDown,
   Copy,
   Save,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { saveTranslation } from "./utils/storage";
 
 const LANGUAGES = [
   { code: "auto", name: "Auto" },
@@ -30,9 +32,13 @@ const LANGUAGES = [
   { code: "de", name: "German" },
   { code: "ja", name: "Japanese" },
   { code: "ko", name: "Korean" },
-  { code: "zh", name: "Chinese" },
+  { code: "zh-CN", name: "Chinese" },
   { code: "ar", name: "Arabic" },
   { code: "ru", name: "Russian" },
+  { code: "pt", name: "Portuguese" },
+  { code: "it", name: "Italian" },
+  { code: "nl", name: "Dutch" },
+  { code: "tr", name: "Turkish" },
 ];
 
 export default function Index() {
@@ -45,7 +51,6 @@ export default function Index() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [showSourceLangs, setShowSourceLangs] = useState(false);
   const [showTargetLangs, setShowTargetLangs] = useState(false);
-  const [translationHistory, setTranslationHistory] = useState([]);
 
   // Debounced translation
   useEffect(() => {
@@ -59,10 +64,80 @@ export default function Index() {
     }
   }, [inputText, sourceLang, targetLang]);
 
-  const translateText = async (text) => {
+  // Multi-API translation dengan fallback
+  const translateText = async (text: string) => {
     if (!text.trim()) return;
 
     setIsTranslating(true);
+
+    // Try API 1: MyMemory (Free, no API key needed, paling stabil!)
+    try {
+      const result = await translateWithMyMemory(text);
+      if (result) {
+        setOutputText(result);
+        setIsTranslating(false);
+        return;
+      }
+    } catch (error) {
+      console.log("MyMemory failed, trying next API...");
+    }
+
+    // Try API 2: LibreTranslate (Fallback)
+    try {
+      const result = await translateWithLibreTranslate(text);
+      if (result) {
+        setOutputText(result);
+        setIsTranslating(false);
+        return;
+      }
+    } catch (error) {
+      console.log("LibreTranslate failed, trying next API...");
+    }
+
+    // Try API 3: Lingva Translate (Fallback)
+    try {
+      const result = await translateWithLingva(text);
+      if (result) {
+        setOutputText(result);
+        setIsTranslating(false);
+        return;
+      }
+    } catch (error) {
+      console.log("All APIs failed");
+    }
+
+    // Semua API gagal
+    setOutputText(
+      "Translation failed. Please check your connection and try again.",
+    );
+    setIsTranslating(false);
+  };
+
+  // API 1: MyMemory (Paling recommended! 10,000 words/day gratis)
+  const translateWithMyMemory = async (
+    text: string,
+  ): Promise<string | null> => {
+    try {
+      const sourceLangCode = sourceLang === "auto" ? "auto" : sourceLang;
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLangCode}|${targetLang}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.responseStatus === 200 && data.responseData?.translatedText) {
+        return data.responseData.translatedText;
+      }
+      return null;
+    } catch (error) {
+      console.error("MyMemory error:", error);
+      return null;
+    }
+  };
+
+  // API 2: LibreTranslate (Backup)
+  const translateWithLibreTranslate = async (
+    text: string,
+  ): Promise<string | null> => {
     try {
       const response = await fetch("https://libretranslate.com/translate", {
         method: "POST",
@@ -72,22 +147,38 @@ export default function Index() {
         body: JSON.stringify({
           q: text,
           source: sourceLang,
-          target: targetLang,
+          target: targetLang === "zh-CN" ? "zh" : targetLang,
           format: "text",
         }),
       });
 
       const data = await response.json();
       if (data.translatedText) {
-        setOutputText(data.translatedText);
-      } else {
-        setOutputText("Translation failed. Please try again.");
+        return data.translatedText;
       }
+      return null;
     } catch (error) {
-      console.error("Translation error:", error);
-      setOutputText("Error connecting to translation service.");
-    } finally {
-      setIsTranslating(false);
+      console.error("LibreTranslate error:", error);
+      return null;
+    }
+  };
+
+  // API 3: Lingva Translate (Backup - uses Google Translate engine)
+  const translateWithLingva = async (text: string): Promise<string | null> => {
+    try {
+      const sourceLangCode = sourceLang === "auto" ? "auto" : sourceLang;
+      const url = `https://lingva.ml/api/v1/${sourceLangCode}/${targetLang}/${encodeURIComponent(text)}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.translation) {
+        return data.translation;
+      }
+      return null;
+    } catch (error) {
+      console.error("Lingva error:", error);
+      return null;
     }
   };
 
@@ -105,28 +196,39 @@ export default function Index() {
     setOutputText(inputText);
   };
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     if (outputText) {
+      await Clipboard.setString(outputText);
       Alert.alert("Copied!", "Translation copied to clipboard");
     }
   };
 
-  const saveTranslation = () => {
-    if (inputText && outputText) {
-      const newEntry = {
-        id: Date.now(),
-        source: inputText,
-        target: outputText,
-        sourceLang,
-        targetLang,
-        date: new Date().toLocaleString(),
-      };
-      setTranslationHistory([newEntry, ...translationHistory]);
-      Alert.alert("Saved!", "Translation saved to history");
+  const handleSaveTranslation = async () => {
+    if (inputText && outputText && !outputText.includes("failed")) {
+      const success = await saveTranslation(
+        inputText,
+        outputText,
+        getLanguageName(sourceLang),
+        getLanguageName(targetLang),
+      );
+
+      if (success) {
+        Alert.alert("Saved!", "Translation saved to history");
+      } else {
+        Alert.alert("Error", "Failed to save translation");
+      }
     }
   };
 
-  const LanguageSelector = ({ isSource, visible, onClose }) => {
+  const LanguageSelector = ({
+    isSource,
+    visible,
+    onClose,
+  }: {
+    isSource: boolean;
+    visible: boolean;
+    onClose: () => void;
+  }) => {
     if (!visible) return null;
 
     const langs = isSource
@@ -157,7 +259,7 @@ export default function Index() {
     );
   };
 
-  const getLanguageName = (code) => {
+  const getLanguageName = (code: string) => {
     return LANGUAGES.find((l) => l.code === code)?.name || code;
   };
 
@@ -231,6 +333,7 @@ export default function Index() {
           {isTranslating && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="small" color="#000" />
+              <Text style={styles.loadingText}>Translating...</Text>
             </View>
           )}
         </View>
@@ -238,7 +341,10 @@ export default function Index() {
 
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            !outputText && styles.actionButtonDisabled,
+          ]}
           onPress={copyToClipboard}
           disabled={!outputText}
         >
@@ -254,8 +360,11 @@ export default function Index() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.actionButton}
-          onPress={saveTranslation}
+          style={[
+            styles.actionButton,
+            !outputText && styles.actionButtonDisabled,
+          ]}
+          onPress={handleSaveTranslation}
           disabled={!outputText}
         >
           <Save size={20} color={outputText ? "#000" : "#ccc"} />
@@ -270,7 +379,6 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Navigation */}
       <View style={styles.navBottom}>
         <TouchableOpacity style={styles.navButton}>
           <House size={24} color="#000" />
@@ -282,13 +390,14 @@ export default function Index() {
           onPress={() => router.push("/history")}
         >
           <History size={24} color="#000" />
-          <Text style={styles.navText}>
-            History ({translationHistory.length})
-          </Text>
+          <Text style={styles.navText}>History</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navButton}>
-          <Bolt size={24} color="#000" />
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/options")}
+        >
+          <Settings size={24} color="#000" />
           <Text style={styles.navText}>Option</Text>
         </TouchableOpacity>
       </View>
@@ -372,6 +481,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 16,
     right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  loadingText: {
+    fontSize: 12,
+    color: "#666",
   },
   actionButtons: {
     flexDirection: "row",
@@ -387,9 +503,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderWidth: 1.2,
-    borderColor: "gray",
+    borderColor: "#000",
     borderRadius: 8,
     backgroundColor: "#fff",
+  },
+  actionButtonDisabled: {
+    borderColor: "#ccc",
   },
   actionButtonText: {
     fontSize: 15,
