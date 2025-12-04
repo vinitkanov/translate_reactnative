@@ -106,14 +106,12 @@ export default function Index() {
       console.log("All APIs failed");
     }
 
-    // Semua API gagal
     setOutputText(
       "Translation failed. Please check your connection and try again.",
     );
     setIsTranslating(false);
   };
 
-  // API 1: MyMemory (Paling recommended! 10,000 words/day gratis)
   const translateWithMyMemory = async (
     text: string,
   ): Promise<string | null> => {
@@ -134,7 +132,6 @@ export default function Index() {
     }
   };
 
-  // API 2: LibreTranslate (Backup)
   const translateWithLibreTranslate = async (
     text: string,
   ): Promise<string | null> => {
@@ -163,7 +160,6 @@ export default function Index() {
     }
   };
 
-  // API 3: Lingva Translate (Backup - uses Google Translate engine)
   const translateWithLingva = async (text: string): Promise<string | null> => {
     try {
       const sourceLangCode = sourceLang === "auto" ? "auto" : sourceLang;

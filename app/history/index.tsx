@@ -33,7 +33,8 @@ export default function HistoryScreen() {
     setLoading(true);
     try {
       const items = await getTranslationHistory();
-      setHistoryItems(items);
+      // Reverse the array to show the newest item first (common practice for history screens)
+      setHistoryItems(items.reverse());
     } catch (error) {
       console.error("Error loading history:", error);
       Alert.alert("Error", "Gagal memuat history");
@@ -74,36 +75,52 @@ export default function HistoryScreen() {
     });
   };
 
-  const renderHistoryItem = ({ item }: { item: TranslationRecord }) => (
-    <TouchableOpacity
-      style={styles.historyItem}
-      onPress={() => handleItemPress(item)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.historyHeader}>
-        <Text style={styles.timestamp}>{item.timestamp}</Text>
-        <Text style={styles.langBadge}>
-          {item.fromLang} → {item.toLang}
-        </Text>
-      </View>
-      <Text style={styles.itemText} numberOfLines={2}>
-        {item.sourceText}
-      </Text>
-      <Text style={styles.arrow}>↓</Text>
-      <Text style={styles.translatedText} numberOfLines={2}>
-        {item.translatedText}
-      </Text>
+  const renderHistoryItem = ({ item }: { item: TranslationRecord }) => {
+    // NOTE: This assumes item.timestamp format is "HH:MM:SS DD/MM/YYYY" or similar
+    // and we want "DD/MM/YYYY, HH:MM:SS" like in the screenshot.
+    // If your item.timestamp is already correctly formatted, just use item.timestamp
+    const parts = item.timestamp.split(" ");
+    let displayTimestamp = item.timestamp; // Fallback
+    if (parts.length >= 2) {
+      // Assuming parts[0] is time (17:59:20) and parts[1] is date (4/12/2025)
+      displayTimestamp = `${parts[1]}, ${parts[0]}`;
+    }
+
+    return (
       <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={(e) => {
-          e.stopPropagation();
-          handleDelete(item.id);
-        }}
+        style={styles.historyItem}
+        onPress={() => handleItemPress(item)}
+        activeOpacity={0.7}
       >
-        <Trash2 size={18} color="#d32f2f" />
+        {/* Timestamp and Delete Icon */}
+        <View style={styles.historyHeader}>
+          <Text style={styles.timestamp}>{displayTimestamp}</Text>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleDelete(item.id);
+            }}
+          >
+            <Trash2 size={18} color="#d32f2f" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Source Text (Original) - FIX: Use item.sourceText */}
+        <Text style={styles.itemText} numberOfLines={3}>
+          {item.sourceText}
+        </Text>
+
+        {/* Down Arrow */}
+        <Text style={styles.arrow}>↓</Text>
+
+        {/* Translated Text - FIX: Use item.translatedText */}
+        <Text style={styles.translatedText} numberOfLines={3}>
+          {item.translatedText}
+        </Text>
       </TouchableOpacity>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -135,6 +152,7 @@ export default function HistoryScreen() {
         <View style={styles.spacer} />
       </ScrollView>
 
+      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navButton}
@@ -206,39 +224,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   historyItem: {
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#d0d0d0",
     borderRadius: 12,
     padding: 16,
     backgroundColor: "#fff",
-    position: "relative",
   },
   historyHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
   },
   timestamp: {
     fontSize: 12,
     color: "#999",
-  },
-  langBadge: {
-    fontSize: 11,
-    color: "#666",
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    marginBottom: 8,
   },
   itemText: {
     fontSize: 14,
     color: "#000",
     lineHeight: 20,
-    marginBottom: 6,
   },
   arrow: {
-    fontSize: 12,
+    fontSize: 16,
     color: "#999",
     textAlign: "center",
     marginVertical: 4,
@@ -248,12 +256,10 @@ const styles = StyleSheet.create({
     color: "#333",
     lineHeight: 20,
     fontStyle: "italic",
+    marginTop: 8,
   },
   deleteButton: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    padding: 8,
+    padding: 4,
   },
   spacer: {
     height: 20,
@@ -267,11 +273,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     paddingVertical: 12,
-    paddingBottom: 8,
+    paddingBottom: 30,
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
-    marginBottom: 30,
   },
   navButton: {
     alignItems: "center",

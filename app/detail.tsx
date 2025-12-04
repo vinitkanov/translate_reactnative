@@ -1,6 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Copy, Trash2, ArrowLeft } from "lucide-react-native";
-import React, { useState, useEffect } from "react";
+import {
+  Copy,
+  Trash2,
+  House,
+  History as HistoryIcon,
+  Settings,
+} from "lucide-react-native";
+import React, { useState } from "react";
 import {
   Alert,
   Clipboard,
@@ -17,7 +23,6 @@ export default function DetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // Ambil data dari params
   const id = params.id as string;
   const sourceText = params.sourceText as string;
   const translatedText = params.translatedText as string;
@@ -25,9 +30,20 @@ export default function DetailScreen() {
   const toLang = params.toLang as string;
   const timestamp = params.timestamp as string;
 
-  const handleCopy = async (text: string) => {
-    await Clipboard.setString(text);
-    Alert.alert("Copied!", "Text copied to clipboard");
+  const handleCopySource = async () => {
+    await Clipboard.setString(sourceText);
+    Alert.alert("Copied!", "Original text copied to clipboard");
+  };
+
+  const handleCopyTranslation = async () => {
+    await Clipboard.setString(translatedText);
+    Alert.alert("Copied!", "Translation copied to clipboard");
+  };
+
+  const handleCopyAll = async () => {
+    const textToCopy = `${sourceText}\n\n${translatedText}`;
+    await Clipboard.setString(textToCopy);
+    Alert.alert("Copied!", "All text copied to clipboard");
   };
 
   const handleDelete = () => {
@@ -40,10 +56,7 @@ export default function DetailScreen() {
           const success = await deleteTranslation(id);
           if (success) {
             Alert.alert("Success", "Item berhasil dihapus", [
-              {
-                text: "OK",
-                onPress: () => router.back(),
-              },
+              { text: "OK", onPress: () => router.back() },
             ]);
           } else {
             Alert.alert("Error", "Gagal menghapus item");
@@ -53,17 +66,16 @@ export default function DetailScreen() {
     ]);
   };
 
-  // Validasi data
   if (!id || !sourceText || !translatedText) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Item tidak ditemukan</Text>
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.errorButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.backButtonText}>Kembali</Text>
+            <Text style={styles.errorButtonText}>Kembali</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -72,94 +84,83 @@ export default function DetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButtonTop}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color="#000" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Title */}
+        <Text style={styles.title}>Detail</Text>
+
+        {/* Timestamp */}
+        <Text style={styles.timestamp}>{timestamp}</Text>
+
+        {/* Original Text Box */}
+        <View style={styles.textBox}>
+          <View style={styles.textBoxHeader}>
+            <Text style={styles.textBoxLabel}>{sourceText}</Text>
+            <TouchableOpacity
+              style={styles.copyIcon}
+              onPress={handleCopySource}
+            >
+              <Copy size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.textContent}>{fromLang}</Text>
+        </View>
+
+        {/* Translation Box */}
+        <View style={styles.textBox}>
+          <View style={styles.textBoxHeader}>
+            <Text style={styles.textBoxLabel}>{translatedText}</Text>
+            <TouchableOpacity
+              style={styles.copyIcon}
+              onPress={handleCopyTranslation}
+            >
+              <Copy size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.textContent}>{toLang}</Text>
+        </View>
+
+        {/* Copy All Button */}
+        <TouchableOpacity style={styles.copyAllButton} onPress={handleCopyAll}>
+          <Text style={styles.copyAllButtonText}>Copy All</Text>
+          <Copy size={20} color="#fff" />
         </TouchableOpacity>
 
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Detail</Text>
-          <TouchableOpacity
-            style={styles.deleteHeaderButton}
-            onPress={handleDelete}
-          >
-            <Trash2 size={22} color="#d32f2f" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Meta Info */}
-        <View style={styles.metaContainer}>
-          <Text style={styles.timestamp}>{timestamp}</Text>
-          <View style={styles.langBadge}>
-            <Text style={styles.langBadgeText}>
-              {fromLang} → {toLang}
-            </Text>
-          </View>
-        </View>
-
-        {/* Original Text */}
-        <View style={styles.textContainer}>
-          <View style={styles.textBox}>
-            <View style={styles.textHeader}>
-              <Text style={styles.textLabel}>Original Text</Text>
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={() => handleCopy(sourceText)}
-              >
-                <Copy size={18} color="#666" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.textContent}>{sourceText}</Text>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.divider}>
-            <Text style={styles.dividerText}>↓</Text>
-          </View>
-
-          {/* Translated Text */}
-          <View style={styles.textBox}>
-            <View style={styles.textHeader}>
-              <Text style={styles.textLabel}>Translation</Text>
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={() => handleCopy(translatedText)}
-              >
-                <Copy size={18} color="#666" />
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.textContent, styles.translatedContent]}>
-              {translatedText}
-            </Text>
-          </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => handleCopy(translatedText)}
-          >
-            <Copy size={20} color="#000" />
-            <Text style={styles.actionButtonText}>Copy</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={handleDelete}
-          >
-            <Trash2 size={20} color="#d32f2f" />
-            <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
-              Delete
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Delete Button */}
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.deleteButtonText}>Delete</Text>
+          <Trash2 size={20} color="#ff0000" />
+        </TouchableOpacity>
       </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/")}
+        >
+          <House size={24} color="#000" />
+          <Text style={styles.navText}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/history")}
+        >
+          <HistoryIcon size={24} color="#000" />
+          <Text style={styles.navText}>History</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/options")}
+        >
+          <Settings size={24} color="#000" />
+          <Text style={styles.navText}>Option</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -170,20 +171,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollContent: {
-    paddingTop: 20,
-    paddingHorizontal: 26,
-    paddingBottom: 60,
-  },
-  backButtonTop: {
-    padding: 8,
-    marginBottom: 16,
-    alignSelf: "flex-start",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
   },
   title: {
     fontSize: 48,
@@ -191,123 +181,114 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#000",
     fontWeight: "400",
-  },
-  deleteHeaderButton: {
-    padding: 8,
-  },
-  metaContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   timestamp: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#999",
-  },
-  langBadge: {
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  langBadgeText: {
-    fontSize: 12,
-    color: "#666",
-    fontWeight: "500",
-  },
-  textContainer: {
-    gap: 16,
+    marginBottom: 32,
   },
   textBox: {
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#d0d0d0",
     borderRadius: 12,
     padding: 16,
+    marginBottom: 16,
     backgroundColor: "#fff",
   },
-  textHeader: {
+  textBoxHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
-  textLabel: {
+  textBoxLabel: {
     fontSize: 12,
     color: "#999",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    fontWeight: "600",
   },
-  copyButton: {
+  copyIcon: {
     padding: 4,
   },
   textContent: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#000",
-    lineHeight: 22,
+    lineHeight: 20,
   },
-  translatedContent: {
-    fontStyle: "italic",
-    color: "#333",
-  },
-  divider: {
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  dividerText: {
-    fontSize: 20,
-    color: "#ccc",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 32,
-  },
-  actionButton: {
-    flex: 1,
+  copyAllButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderWidth: 1.2,
-    borderColor: "#000",
+    backgroundColor: "#000",
+    paddingVertical: 16,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    marginTop: 24,
+    marginBottom: 12,
   },
-  actionButtonText: {
-    fontSize: 15,
-    color: "#000",
+  copyAllButtonText: {
+    fontSize: 16,
+    color: "#fff",
     fontWeight: "500",
   },
   deleteButton: {
-    borderColor: "#d32f2f",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ff0000",
+    paddingVertical: 16,
+    borderRadius: 8,
   },
   deleteButtonText: {
-    color: "#d32f2f",
+    fontSize: 16,
+    color: "#ff0000",
+    fontWeight: "500",
+  },
+  bottomNav: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingBottom: 32,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  navButton: {
+    alignItems: "center",
+    gap: 4,
+  },
+  navText: {
+    fontSize: 12,
+    color: "#000",
+    marginTop: 2,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: 40,
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 17,
     color: "#999",
-    marginBottom: 24,
+    marginBottom: 32,
   },
-  backButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+  errorButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 40,
     backgroundColor: "#000",
-    borderRadius: 8,
+    borderRadius: 12,
   },
-  backButtonText: {
+  errorButtonText: {
     fontSize: 15,
     color: "#fff",
-    fontWeight: "500",
+    fontWeight: "600",
   },
 });
