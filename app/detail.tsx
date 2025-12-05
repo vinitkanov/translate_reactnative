@@ -88,13 +88,10 @@ export default function DetailScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title */}
         <Text style={styles.title}>Detail</Text>
 
-        {/* Timestamp */}
         <Text style={styles.timestamp}>{timestamp}</Text>
 
-        {/* Original Text Box */}
         <View style={styles.textBox}>
           <View style={styles.textBoxHeader}>
             <Text style={styles.textBoxLabel}>{sourceText}</Text>
@@ -108,7 +105,6 @@ export default function DetailScreen() {
           <Text style={styles.textContent}>{fromLang}</Text>
         </View>
 
-        {/* Translation Box */}
         <View style={styles.textBox}>
           <View style={styles.textBoxHeader}>
             <Text style={styles.textBoxLabel}>{translatedText}</Text>
@@ -122,20 +118,17 @@ export default function DetailScreen() {
           <Text style={styles.textContent}>{toLang}</Text>
         </View>
 
-        {/* Copy All Button */}
         <TouchableOpacity style={styles.copyAllButton} onPress={handleCopyAll}>
           <Text style={styles.copyAllButtonText}>Copy All</Text>
           <Copy size={20} color="#fff" />
         </TouchableOpacity>
 
-        {/* Delete Button */}
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Delete</Text>
           <Trash2 size={20} color="#ff0000" />
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navButton}

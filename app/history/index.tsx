@@ -1,5 +1,11 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { History, House, Settings, Trash2 } from "lucide-react-native";
+import {
+  History,
+  House,
+  Settings,
+  Trash2,
+  SeparatorHorizontal,
+} from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -33,7 +39,6 @@ export default function HistoryScreen() {
     setLoading(true);
     try {
       const items = await getTranslationHistory();
-      // Reverse the array to show the newest item first (common practice for history screens)
       setHistoryItems(items.reverse());
     } catch (error) {
       console.error("Error loading history:", error);
@@ -61,7 +66,6 @@ export default function HistoryScreen() {
   };
 
   const handleItemPress = (item: TranslationRecord) => {
-    // Pass semua data langsung via params
     router.push({
       pathname: "/detail",
       params: {
@@ -76,13 +80,9 @@ export default function HistoryScreen() {
   };
 
   const renderHistoryItem = ({ item }: { item: TranslationRecord }) => {
-    // NOTE: This assumes item.timestamp format is "HH:MM:SS DD/MM/YYYY" or similar
-    // and we want "DD/MM/YYYY, HH:MM:SS" like in the screenshot.
-    // If your item.timestamp is already correctly formatted, just use item.timestamp
     const parts = item.timestamp.split(" ");
-    let displayTimestamp = item.timestamp; // Fallback
+    let displayTimestamp = item.timestamp;
     if (parts.length >= 2) {
-      // Assuming parts[0] is time (17:59:20) and parts[1] is date (4/12/2025)
       displayTimestamp = `${parts[1]}, ${parts[0]}`;
     }
 
@@ -92,7 +92,6 @@ export default function HistoryScreen() {
         onPress={() => handleItemPress(item)}
         activeOpacity={0.7}
       >
-        {/* Timestamp and Delete Icon */}
         <View style={styles.historyHeader}>
           <Text style={styles.timestamp}>{displayTimestamp}</Text>
           <TouchableOpacity
@@ -106,17 +105,17 @@ export default function HistoryScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Source Text (Original) - FIX: Use item.sourceText */}
         <Text style={styles.itemText} numberOfLines={3}>
-          {item.sourceText}
+          {item.fromLang}
         </Text>
 
-        {/* Down Arrow */}
-        <Text style={styles.arrow}>↓</Text>
+        <Text style={styles.arrow}>
+          {" "}
+          <SeparatorHorizontal />
+        </Text>
 
-        {/* Translated Text - FIX: Use item.translatedText */}
         <Text style={styles.translatedText} numberOfLines={3}>
-          {item.translatedText}
+          {item.toLang}
         </Text>
       </TouchableOpacity>
     );
@@ -152,7 +151,6 @@ export default function HistoryScreen() {
         <View style={styles.spacer} />
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navButton}

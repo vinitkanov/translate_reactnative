@@ -52,7 +52,6 @@ export default function Index() {
   const [showSourceLangs, setShowSourceLangs] = useState(false);
   const [showTargetLangs, setShowTargetLangs] = useState(false);
 
-  // Debounced translation
   useEffect(() => {
     if (inputText.trim()) {
       const timer = setTimeout(() => {
@@ -64,13 +63,11 @@ export default function Index() {
     }
   }, [inputText, sourceLang, targetLang]);
 
-  // Multi-API translation dengan fallback
   const translateText = async (text: string) => {
     if (!text.trim()) return;
 
     setIsTranslating(true);
 
-    // Try API 1: MyMemory (Free, no API key needed, paling stabil!)
     try {
       const result = await translateWithMyMemory(text);
       if (result) {
@@ -82,7 +79,6 @@ export default function Index() {
       console.log("MyMemory failed, trying next API...");
     }
 
-    // Try API 2: LibreTranslate (Fallback)
     try {
       const result = await translateWithLibreTranslate(text);
       if (result) {
@@ -94,7 +90,6 @@ export default function Index() {
       console.log("LibreTranslate failed, trying next API...");
     }
 
-    // Try API 3: Lingva Translate (Fallback)
     try {
       const result = await translateWithLingva(text);
       if (result) {

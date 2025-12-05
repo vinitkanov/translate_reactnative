@@ -16,25 +16,25 @@ export default function AboutScreen() {
   const features = [
     {
       icon: <Globe size={24} color="#000" />,
-      title: "Multi-Language Support",
+      title: "Dukungan Berbagai Bahasa",
       description:
-        "Support for 10+ languages including English, Indonesian, Spanish, French, and more",
+        "Mendukung 10+ bahasa termasuk Inggris, Indonesia, Spanyol, Perancis, dan lainnya",
     },
     {
       icon: <Zap size={24} color="#000" />,
-      title: "Real-time Translation",
-      description:
-        "Fast and accurate translations powered by LibreTranslate API",
+      title: "Terjemahan Real-time",
+      description: "Cepat dan akurat di tenagai oleh API terbaru",
     },
     {
       icon: <Shield size={24} color="#000" />,
-      title: "Privacy First",
-      description: "All translations are stored locally on your device",
+      title: "Ramah Privasi",
+      description:
+        "History disimpan secara lokal dan tidak ada telemetri atau analistic",
     },
     {
       icon: <Heart size={24} color="#000" />,
-      title: "Free & Open Source",
-      description: "No hidden costs, no subscriptions, completely free to use",
+      title: "Gratis dan Open Source",
+      description: "Tidak ada biaya dan tersedia di Github",
     },
   ];
 
@@ -51,13 +51,13 @@ export default function AboutScreen() {
         <Text style={styles.title}>About</Text>
 
         <Text style={styles.description}>
-          A simple, elegant translation app that helps you communicate across
-          languages. Built with React Native and powered by open-source
-          translation technology.
+          Aplikasi translasi yang sederhana dibuat oleh Team Satu. Beranggotakan
+          3 orang. Aplikasi ini dibuat untuk memenuhi tugas akhir semester kelas
+          11.
         </Text>
 
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Features</Text>
+          <Text style={styles.sectionTitle}>Fitur Unggulan</Text>
           {features.map((feature, index) => (
             <View key={index} style={styles.featureItem}>
               <View style={styles.featureIcon}>{feature.icon}</View>

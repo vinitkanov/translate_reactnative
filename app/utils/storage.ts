@@ -11,14 +11,11 @@ export interface TranslationRecord {
 
 const STORAGE_KEY = "translation_history";
 
-/**
- * Simpan terjemahan baru ke AsyncStorage
- */
 export async function saveTranslation(
   fromLang: string,
   toLang: string,
   sourceText: string,
-  translatedText: string
+  translatedText: string,
 ): Promise<TranslationRecord | null> {
   try {
     const newRecord: TranslationRecord = {
@@ -27,13 +24,12 @@ export async function saveTranslation(
       toLang,
       sourceText,
       translatedText,
-      timestamp: new Date().toLocaleString("id-ID"), // Format: "2/12/2025, 15:30:45"
+      timestamp: new Date().toLocaleString("id-ID"),
     };
 
     const existing = await AsyncStorage.getItem(STORAGE_KEY);
     const history: TranslationRecord[] = existing ? JSON.parse(existing) : [];
 
-    // Tambahkan record baru di awal (paling terbaru di atas)
     history.unshift(newRecord);
 
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(history));
@@ -44,9 +40,6 @@ export async function saveTranslation(
   }
 }
 
-/**
- * Ambil semua history terjemahan
- */
 export async function getTranslationHistory(): Promise<TranslationRecord[]> {
   try {
     const data = await AsyncStorage.getItem(STORAGE_KEY);
@@ -57,9 +50,6 @@ export async function getTranslationHistory(): Promise<TranslationRecord[]> {
   }
 }
 
-/**
- * Hapus satu record dari history
- */
 export async function deleteTranslation(id: string): Promise<boolean> {
   try {
     const existing = await AsyncStorage.getItem(STORAGE_KEY);
@@ -76,9 +66,6 @@ export async function deleteTranslation(id: string): Promise<boolean> {
   }
 }
 
-/**
- * Hapus semua history
- */
 export async function clearTranslationHistory(): Promise<boolean> {
   try {
     await AsyncStorage.removeItem(STORAGE_KEY);

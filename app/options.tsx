@@ -49,28 +49,6 @@ export default function OptionsScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Options</Text>
 
-        <View style={styles.settingsSection}>
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Dark Theme</Text>
-            <Switch
-              value={darkTheme}
-              onValueChange={setDarkTheme}
-              trackColor={{ false: "#d0d0d0", true: "#000" }}
-              thumbColor="#fff"
-            />
-          </View>
-
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Auto Translate</Text>
-            <Switch
-              value={autoTranslate}
-              onValueChange={setAutoTranslate}
-              trackColor={{ false: "#d0d0d0", true: "#000" }}
-              thumbColor="#fff"
-            />
-          </View>
-        </View>
-
         <TouchableOpacity style={styles.menuItem} onPress={handleAbout}>
           <View style={styles.menuItemLeft}>
             <Info size={20} color="#000" />
