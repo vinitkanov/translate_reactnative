@@ -1,50 +1,81 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# The Translator - Aplikasi Penerjemah Berbasis React Native
 
-## Get started
+    
+# Tentang Aplikasi
 
-1. Install dependencies
+**The Translator** adalah aplikasi penerjemah berbasis **React Native** yang menggunakan berbagai penyedia API:
 
-   ```bash
-   npm install
-   ```
+- **MyMemory**
+- **Lingva**
+- **LibreTranslate**
 
-2. Start the app
+Aplikasi ini dibuat untuk memberikan pengalaman terjemahan yang cepat, simpel, dan tanpa mengorbankan privasi pengguna.
 
-   ```bash
-   npx expo start
-   ```
+Dikembangkan sebagai **tugas akhir semester** oleh tim beranggotakan tiga orang.
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Fitur Utama
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- 🔓 **Open Source** — bebas dimodifikasi dan dikembangkan oleh siapa saja  
+- 🔐 **Privacy-Friendly** — riwayat disimpan secara *local*, tanpa telemetri  
+- ⚡ **Performa Cepat** — UI responsif menggunakan React Native + Expo  
+- 📱 **User-Friendly** — desain sederhana dan mudah digunakan  
+- 🌍 **Multi-Source Translation** — support beberapa layanan API
 
-## Get a fresh project
+---
 
-When you're ready, run:
+# Preview 
 
-```bash
-npm run reset-project
+![Preview](assets/images/preview.png)
+
+---
+
+# Cara Build Aplikasi
+
+## 1. Prasyarat
+
+Pastikan lingkungan pengembangan sudah terpasang:
+
+- **Expo environment**
+- **EAS CLI**
+- **Node.js**
+
+
+
+## 2. Instruksi Build
+
+Clone repositori:
+
+```sh
+git clone https://github.com/vinitkanov/translate_reactnative.git
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Masuk ke directory :
 
-## Learn more
+```sh
+cd translate_reactnative
+```
+Install dependencies:
 
-To learn more about developing your project with Expo, look at the following resources:
+```sh
+npm install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Build untuk **Android**:
 
-## Join the community
+```sh
+eas build -p android
+```
 
-Join our community of developers creating universal apps.
+Build untuk **iOS**:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```sh
+eas build -p ios
+```
+
+
+# Perhatian
+
+Aplikasi ini dibuat untuk tujuan edukasi.
+Pengembang tidak bertanggung jawab atas segala bentuk penyalahgunaan.
